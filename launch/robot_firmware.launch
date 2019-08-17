@@ -4,6 +4,4 @@
     <param name="baud" value="115200"/>
   </node>
 
-  <include file="$(find robotcraft2019_driver_g09)/launch/robot_driver.launch"/>
-
 </launch>

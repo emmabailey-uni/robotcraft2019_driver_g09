@@ -170,7 +170,8 @@ private:
         geometry_msgs::Twist cmdVelUpdate(){
             auto vel_MSG = geometry_msgs::Twist();
             // Our code here
-
+            vel_MSG.linear.x = v;
+            vel_MSG.angular.z = w;
             return vel_MSG;
         }
 

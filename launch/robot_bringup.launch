@@ -3,4 +3,5 @@
   <include file="$(find robotcraft2019_driver_g09)/launch/robot_driver.launch"/>
   <include file="$(find robotcraft2019_driver_g09)/launch/robot_firmware.launch"/>
   <include file="$(find robotcraft2019_robot_description)/launch/display_robotcraft2019.launch"/>
+  
 </launch>
