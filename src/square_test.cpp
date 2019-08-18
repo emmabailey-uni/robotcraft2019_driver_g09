@@ -77,47 +77,6 @@ private:
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-        /*
-
-
-
-        if(start_turning_flag){
-        	// Start turning
-          float desired_orient = theta_orig + M_PI/2;
-          if(desired_orient > 2*M_PI){
-            desired_orient = desired_orient - 2*M_PI;
-          }
-
-          if(theta < desired_orient || abs(theta-desired_orient) > M_PI/2){
-            square_vel_msg.linear.x = 0.0; // m/0.1s
-            square_vel_msg.angular.z = M_PI/5;
-            //std::cout<<"Theta current: "<<theta<<"\n";
-            //std::cout<<"Theta desired: "<<desired_orient<<"\n";
-
-          } else{
-          	// When the turn is finished update the reference position
-          	x_orig = x;
-          	y_orig = y;
-            distance = 0;
-
-          	// End turning and start moving forward
-            start_turning_flag = false;
-            done_driving_forward_flag = false;
-          }
-        }
-        // Return the velocity command message
-        */
         return square_vel_msg;
     }
 
