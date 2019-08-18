@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <cstdlib>
+#include <stdbool.h>
 
 #include "std_msgs/Float32.h"
 #include "ros/ros.h"
@@ -23,19 +24,18 @@ private:
     ros::Subscriber odom_sub;
 
 
+
     geometry_msgs::Twist calculateCommand()
     {
         //Variable to store original position
         static float x_orig , y_orig, theta_orig;
 
-        static int switch_case = 0;
         static bool init_flag = false;
         static bool done_driving_forward_flag = false;
-        static bool start_turing_flag = false;
+        static bool start_turning_flag = false;
 
 
         if(!init_flag){
-          switch_case = 1;
           x_orig = 0;
           y_orig = 0;
           theta_orig = 0;
@@ -43,87 +43,96 @@ private:
         }
 
         auto square_vel_msg = geometry_msgs::Twist();
-        //Code here for square test
 
-        //Cycle through 4 directions to drive in, statring in dir x+
-        if(switch_case == 4){
-        	switch_case = 1;
+        //std::cout<<"Theta current: "<<theta<<"\n";
+
+
+        float distance = sqrt((x_orig - x)*(x_orig - x) + (y_orig - y)*(y_orig - y));
+        if (distance<0.5){
+          square_vel_msg.linear.x = 0.5; // m/0.1s
+          square_vel_msg.angular.z = 0;
+          theta_orig = theta;
+        }else{
+          done_driving_forward_flag = true;
+          start_turning_flag = true;
         }
 
 
-        switch(switch_case) {
-
-            case 1 :       	// 0 degree line - moving right on horizontal
-                            if (x < x_orig + 0.5){
-                              square_vel_msg.linear.x = 0.001; // m/0.1s
-                              square_vel_msg.angular.z = 0;
-                            }else{
-                              done_driving_forward_flag = true;
-                            }
-                            break;
-
-            case 2 :		// Avoidance manuever
-                            if (y < y_orig + 0.5){
-                              square_vel_msg.linear.x = 0.001; // m/0.1s
-                              square_vel_msg.angular.z = 0;
-                            }else{
-                              done_driving_forward_flag = true;
-                            }
-                            break;
-            case 3 :       	// PI controller
-                            if (x > x_orig - 0.5){
-                              square_vel_msg.linear.x = 0.001; // m/0.1s
-                              square_vel_msg.angular.z = 0;
-                            }else{
-                              done_driving_forward_flag = true;
-                            }
-                            break;
-
-            case 4 :		// Avoidance manuever
-                            if (y > y_orig - 0.5){
-                              square_vel_msg.linear.x = 0.001; // m/0.1s
-                              square_vel_msg.angular.z = 0;
-                            }else{
-                              done_driving_forward_flag = true;
-                            }
-                            break;
+        if(start_turning_flag){
+          if(theta_orig > 1.5 && theta < 0.5){
+            theta = theta+2;
+          }
+          if(fabs(theta - theta_orig) <= 0.499){
+            square_vel_msg.angular.z = 1;
+            std::cout<<"Theta current: "<<theta<<"\n";
+            std::cout<<"Theta orig: "<<theta_orig<<"\n";
+          }else{
+            // When the turn is finished update the reference position
+            x_orig = x;
+            y_orig = y;
+            distance = 0;
+            start_turning_flag = false;
+            done_driving_forward_flag = false;
+          }
         }
 
-        if(done_driving_forward_flag && !started_turning_flag){
-        	// Update reference angle only once after driving forward is done
-        	theta_orig = theta;
-        	started_turning_flag = true;
-        }
 
-        if(started_turning_flag){
+
+
+
+
+
+
+
+
+
+
+
+        /*
+
+
+
+        if(start_turning_flag){
         	// Start turning
-          if(theta < theta_orig + M_PI/2){
+          float desired_orient = theta_orig + M_PI/2;
+          if(desired_orient > 2*M_PI){
+            desired_orient = desired_orient - 2*M_PI;
+          }
+
+          if(theta < desired_orient || abs(theta-desired_orient) > M_PI/2){
             square_vel_msg.linear.x = 0.0; // m/0.1s
-            square_vel_msg.angular.z = M_PI;
+            square_vel_msg.angular.z = M_PI/5;
+            //std::cout<<"Theta current: "<<theta<<"\n";
+            //std::cout<<"Theta desired: "<<desired_orient<<"\n";
+
           } else{
           	// When the turn is finished update the reference position
           	x_orig = x;
           	y_orig = y;
-          	// Update switch case
-          	switch_case++;
+            distance = 0;
+
           	// End turning and start moving forward
-            started_turning_flag = false;
+            start_turning_flag = false;
             done_driving_forward_flag = false;
           }
         }
         // Return the velocity command message
+        */
         return square_vel_msg;
     }
 
 
+    void odomCallback(const nav_msgs::Odometry::ConstPtr &msg) {
+      x = msg->pose.pose.position.x;
+      y = msg->pose.pose.position.y;
+      //theta = msg->pose.pose.orientation.z;
 
 
-    void odomCallback(const nav_msgs::Odometry& odom_msg)
-    {
-    	// Update position values with values from the pose_pub msgs
-        x = odom_msg.pose.pose.position.x;
-        y = odom_msg.pose.pose.position.y;
-        theta = odom_msg.pose.pose.orientation.w;
+      theta = msg->pose.pose.orientation.z;
+      if(theta < 0){
+        theta = 1+1+theta;
+      }
+
     }
 
 
@@ -136,7 +145,8 @@ public:
         this->square_vel_pub = this->n.advertise<geometry_msgs::Twist>("square_vel_pub", 10);
 
         // Create a subscriber for position
-        this->odom_sub = n.subscribe("odom_pub", 10, &SquareTest::odomCallback, this);
+        //CHANGE BACK TO ODOM_PUB FOR ARDUINO
+        this->odom_sub = n.subscribe("odom", 10, &SquareTest::odomCallback, this);
 
     }
 

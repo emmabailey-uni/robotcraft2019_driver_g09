@@ -199,7 +199,7 @@ public:
 
         // Create a publisher object, able to push messages
         this->cmd_vel_pub = this->n.advertise<geometry_msgs::Twist>("cmd_vel", 10);
-        this ->odom_pub = this->n.advertise<nav_msgs::Odometry>("odom", 10);
+        this->odom_pub = this->n.advertise<nav_msgs::Odometry>("odom", 10);
         this->set_pose_pub = this->n.advertise<geometry_msgs::Pose2D>("set_pose", 10);
         this->rgb_leds_pub = this->n.advertise<std_msgs::UInt8MultiArray>("rgb_leds", 10);
         this-> ir_front_sensor = this->n.advertise<sensor_msgs::Range>("ir_front_sensor", 10);
