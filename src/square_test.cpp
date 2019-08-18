@@ -104,6 +104,9 @@ private:
             square_vel_msg.linear.x = 0.0; // m/0.1s
             square_vel_msg.angular.z = M_PI;
           } else{
+          	x_orig = x;
+          	y_orig = y;
+          	theta_orig = theta;
             done_flag = false;
           }
         }
