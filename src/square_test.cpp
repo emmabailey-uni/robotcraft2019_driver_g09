@@ -43,15 +43,15 @@ private:
         //Code here for square test
 
         //Allowing error of 10 degrees
-        if(theta<=(M_PI/18) && theta>=(2*M_PI - M_PI/18)){
+        if(theta_orig<=(M_PI/18) && theta_orig>=(2*M_PI - M_PI/18)){
         	// 0 degree line
         	switch_case = 1;
         }
-        else if (theta>=(M_PI/2.25) && theta<=(M_PI/1.8)){
+        else if (theta_orig>=(M_PI/2.25) && theta_orig<=(M_PI/1.8)){
         	// 90 degree line
         	switch_case = 2;
         }
-        else if(theta>=(M_PI-M_PI/18) && theta<=(M_PI+M_PI/18)){
+        else if(theta_orig>=(M_PI-M_PI/18) && theta_orig<=(M_PI+M_PI/18)){
         	// 180 degree line
         	switch_case = 3;
         }
@@ -100,10 +100,17 @@ private:
         }
 
         if(done_flag){
+          if(turning_flag){
+            theta_orig = theta;
+          }else{
+            turning_flag = false;
+          }
           if(theta < theta_orig + M_PI/2){
             square_vel_msg.linear.x = 0.0; // m/0.1s
             square_vel_msg.angular.z = M_PI;
           } else{
+          	x_orig = x;
+          	y_orig = y;
             done_flag = false;
           }
         }
