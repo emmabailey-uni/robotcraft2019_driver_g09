@@ -30,9 +30,12 @@ private:
 
         static int switch_case = 0;
         static bool init_flag = false;
-        static bool done_flag = false;
+        static bool done_driving_forward_flag = false;
+        static bool start_turing_flag = false;
+
 
         if(!init_flag){
+          switch_case = 1;
           x_orig = 0;
           y_orig = 0;
           theta_orig = 0;
@@ -42,22 +45,9 @@ private:
         auto square_vel_msg = geometry_msgs::Twist();
         //Code here for square test
 
-        //Allowing error of 10 degrees
-        if(theta<=(M_PI/18) && theta>=(2*M_PI - M_PI/18)){
-        	// 0 degree line
+        //Cycle through 4 directions to drive in, statring in dir x+
+        if(switch_case == 4){
         	switch_case = 1;
-        }
-        else if (theta>=(M_PI/2.25) && theta<=(M_PI/1.8)){
-        	// 90 degree line
-        	switch_case = 2;
-        }
-        else if(theta>=(M_PI-M_PI/18) && theta<=(M_PI+M_PI/18)){
-        	// 180 degree line
-        	switch_case = 3;
-        }
-        else {
-          //270 degree line to complete square
-          switch_case = 4;
         }
 
 
@@ -68,7 +58,7 @@ private:
                               square_vel_msg.linear.x = 0.001; // m/0.1s
                               square_vel_msg.angular.z = 0;
                             }else{
-                              done_flag = true;
+                              done_driving_forward_flag = true;
                             }
                             break;
 
@@ -77,7 +67,7 @@ private:
                               square_vel_msg.linear.x = 0.001; // m/0.1s
                               square_vel_msg.angular.z = 0;
                             }else{
-                              done_flag = true;
+                              done_driving_forward_flag = true;
                             }
                             break;
             case 3 :       	// PI controller
@@ -85,7 +75,7 @@ private:
                               square_vel_msg.linear.x = 0.001; // m/0.1s
                               square_vel_msg.angular.z = 0;
                             }else{
-                              done_flag = true;
+                              done_driving_forward_flag = true;
                             }
                             break;
 
@@ -94,20 +84,34 @@ private:
                               square_vel_msg.linear.x = 0.001; // m/0.1s
                               square_vel_msg.angular.z = 0;
                             }else{
-                              done_flag = true;
+                              done_driving_forward_flag = true;
                             }
                             break;
         }
 
-        if(done_flag){
+        if(done_driving_forward_flag && !started_turning_flag){
+        	// Update reference angle only once after driving forward is done
+        	theta_orig = theta;
+        	started_turning_flag = true;
+        }
+
+        if(started_turning_flag){
+        	// Start turning
           if(theta < theta_orig + M_PI/2){
             square_vel_msg.linear.x = 0.0; // m/0.1s
             square_vel_msg.angular.z = M_PI;
           } else{
-            done_flag = false;
+          	// When the turn is finished update the reference position
+          	x_orig = x;
+          	y_orig = y;
+          	// Update switch case
+          	switch_case++;
+          	// End turning and start moving forward
+            started_turning_flag = false;
+            done_driving_forward_flag = false;
           }
         }
-
+        // Return the velocity command message
         return square_vel_msg;
     }
 
