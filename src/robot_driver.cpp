@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <rosserial_arduino/Test.h>
 
 #include "ros/ros.h"
 #include "sensor_msgs/LaserScan.h"
@@ -50,6 +51,10 @@ private:
     ros::Subscriber front_dist_sub;
     ros::Subscriber pose_sub;
     ros::Subscriber square_vel_sub;
+
+    //Service client
+    ros::ServiceClient client;
+
 
     double front_obstacle_distance;
     double right_obstacle_distance;
@@ -190,6 +195,20 @@ private:
         return rgb_MSG;
     }
 
+    void switchBuzzerState(char c){
+        // Set led to "0" or "1" by char c
+        rosserial_arduino::Test Buzzer_ctr;
+        Buzzer_ctr.request.input = c;
+
+        //NOT SURE IF THIS IS THE CORRECT WAY TO ACCESS CLIENT
+        if(this->client.call(Buzzer_ctr)){
+            ROS_INFO(Buzzer_ctr.response.output);
+        }else{
+            ROS_ERROR("Failed to call service ");
+        }
+    }
+
+
 
 public:
     RobotDriver(){
@@ -201,9 +220,9 @@ public:
         this->odom_pub = this->n.advertise<nav_msgs::Odometry>("odom", 10);
         this->set_pose_pub = this->n.advertise<geometry_msgs::Pose2D>("set_pose", 10);
         this->rgb_leds_pub = this->n.advertise<std_msgs::UInt8MultiArray>("rgb_leds", 10);
-        this-> ir_front_sensor = this->n.advertise<sensor_msgs::Range>("ir_front_sensor", 10);
-        this-> ir_left_sensor = this->n.advertise<sensor_msgs::Range>("ir_left_sensor", 10);
-        this-> ir_right_sensor = this->n.advertise<sensor_msgs::Range>("ir_right_sensor", 10);
+        this->ir_front_sensor = this->n.advertise<sensor_msgs::Range>("ir_front_sensor", 10);
+        this->ir_left_sensor = this->n.advertise<sensor_msgs::Range>("ir_left_sensor", 10);
+        this->ir_right_sensor = this->n.advertise<sensor_msgs::Range>("ir_right_sensor", 10);
 
         // Create a subscriber for laser scans
         //this->laser_sub = n.subscribe("base_scan", 10, &SquareTest::laserCallback, this);
@@ -214,10 +233,15 @@ public:
         this->square_vel_sub = n.subscribe("square_vel_pub", 10, &RobotDriver::SquareVelCallback, this);
 
 
+        // Service Client
+        this->client = n.serviceClient<rosserial_arduino::Test>("Buzzer_switch");
+
+
     }
 
 
     void run(){
+        int count = 0;
         // Send messages in a loop
         ros::Rate loop_rate(10);
         while (ros::ok())
@@ -233,6 +257,19 @@ public:
             this->cmd_vel_pub.publish(vel_MSG);
             this->set_pose_pub.publish(pose_MSG);
             this->rgb_leds_pub.publish(rgb_MSG);
+
+            // Buzz from count 100 to 200
+            if(count = 100){
+                switchBuzzerState("1");
+            }
+            if(count = 200){
+                switchBuzzerState("0");
+            }
+            if(count > 200){
+                count = count;
+            }else{
+                count++;
+            }
 
             ros::spinOnce();
 
