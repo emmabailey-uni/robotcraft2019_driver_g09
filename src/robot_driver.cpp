@@ -233,8 +233,8 @@ public:
         this->square_vel_sub = n.subscribe("square_vel_pub", 10, &RobotDriver::SquareVelCallback, this);
 
 
-        // Service Client
-        this->client = n.serviceClient<rosserial_arduino::Test>("Buzzer_switch");
+        // Service Client ALSO NOT SURE IF I NEED TO ADD "~" BEFORE switch_buzzer_state
+        this->client = n.serviceClient<rosserial_arduino::Test>("switch_buzzer_state");
 
 
     }
