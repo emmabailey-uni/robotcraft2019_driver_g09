@@ -2,12 +2,14 @@
 
 #include <cstdlib>
 #include <stdbool.h>
+#include <tf/transform_datatypes.h>
 
 #include "std_msgs/Float32.h"
 #include "ros/ros.h"
 #include "geometry_msgs/Pose2D.h"
 #include "geometry_msgs/Twist.h"
 #include "nav_msgs/Odometry.h"
+
 
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643383279502884L
@@ -55,6 +57,8 @@ private:
         static bool done_flag = true;
         static int i = 0;
         static CONTROLLER_STATE ControllerState;
+
+
 
 
         if(!init_flag){
@@ -123,10 +127,14 @@ private:
 
 
     void odomCallback(const nav_msgs::Odometry::ConstPtr &msg) {
-      x = msg->pose.pose.position.x;
-      y = msg->pose.pose.position.y;
-      theta = M_PI*(msg->pose.pose.orientation.z);
-
+		tf::Quaternion q(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
+		tf::Matrix3x3 m(q);
+		double roll, pitch, yaw;
+		m.getRPY(roll, pitch, yaw);
+		x = msg->pose.pose.position.x;
+		y = msg->pose.pose.position.y;
+		theta = yaw;
+		std::cout << "YAW" << yaw << "\n";
     }
 
 
