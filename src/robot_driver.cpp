@@ -1,7 +1,5 @@
 #include <iostream>
-
 #include <cstdlib>
-
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 
@@ -58,7 +56,7 @@ private:
     double left_obstacle_distance;
 
     geometry_msgs::Twist calculateCommand(){
-      auto msg = geometry_msgs::Twist();
+        auto msg = geometry_msgs::Twist();
     }
 
     //Callback functions for subscribers
@@ -163,33 +161,34 @@ private:
     }
 
     void SquareVelCallback(const geometry_msgs::Twist& square_vel_msg){
-      v=square_vel_msg.linear.x;
-      w=square_vel_msg.angular.z;
+        // Update globally stored velocities for further use/publishing
+        v=square_vel_msg.linear.x;
+        w=square_vel_msg.angular.z;
     }
 
-        geometry_msgs::Twist cmdVelUpdate(){
-            auto vel_MSG = geometry_msgs::Twist();
-            // Our code here
-            vel_MSG.linear.x = v;
-            vel_MSG.angular.z = w;
-            return vel_MSG;
-        }
+    geometry_msgs::Twist cmdVelUpdate(){
+        auto vel_MSG = geometry_msgs::Twist();
+        // Update velocities to be published
+        vel_MSG.linear.x = v;
+        vel_MSG.angular.z = w;
+        return vel_MSG;
+    }
 
-        geometry_msgs::Pose2D setPose(){
-            auto pose_MSG = geometry_msgs::Pose2D();
-            // Our code here
+    geometry_msgs::Pose2D setPose(){
+        auto pose_MSG = geometry_msgs::Pose2D();
+        // Set position to zero
+        pose_MSG.x = 0.0;
+        pose_MSG.y = 0.0;
+        pose_MSG.theta = 0.0;
+        return pose_MSG;
+    }
 
-            return pose_MSG;
-        }
-
-        std_msgs::UInt8MultiArray setLEDs(){
-            auto rgb_MSG = std_msgs::UInt8MultiArray();
-            // Our code here
-
-            return rgb_MSG;
-        }
-
-
+    std_msgs::UInt8MultiArray setLEDs(){
+        auto rgb_MSG = std_msgs::UInt8MultiArray();
+        // Set color of led lights, the first 3 enteries are for LED_1 [255,0,0] and the last 3 for LED_2 [0,255,0]
+        rgb_MSG.data = [255,0,0,0,255,0];
+        return rgb_MSG;
+    }
 
 
 public:
