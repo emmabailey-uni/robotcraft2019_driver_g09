@@ -28,9 +28,9 @@ private:
 
     float v;
 	float w;
-	float K_omega = 0.3; 
-	float K_psi  = 1;
-	float p = 1;
+	float K_omega = 1; // Linear error 
+	float K_psi  = 1.6;    // Angular error
+	float p = 1;		 // Recovery speed during line following
 	float theta_ref;
 
 	float goal_pos_arr[4][2] = {
