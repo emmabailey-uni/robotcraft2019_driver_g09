@@ -25,11 +25,13 @@ private:
     ros::Publisher square_vel_pub;
     ros::Subscriber odom_sub;
 
+    float K_psi;
+
 
     float v;
 	float w;
 	float K_omega = 1; // Linear error 
-	float K_psi  = 1.6;    // Angular error
+	//float K_psi  = 1.6;    // Angular error
 	float p = 1;		 // Recovery speed during line following
 	float theta_ref;
 
@@ -149,6 +151,12 @@ public:
         // Create a subscriber for position
         //CHANGE BACK TO ODOM_PUB FOR ARDUINO
         this->odom_sub = n.subscribe("odom", 10, &SquareTest::odomCallback, this);
+
+        this->n.getParam("/K_psi", K_psi);
+        this->n.getParam("/K_omega", K_omega);
+        this->n.getParam("/p", p);
+
+
 
     }
 
