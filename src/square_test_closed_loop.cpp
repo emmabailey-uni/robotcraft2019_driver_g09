@@ -25,14 +25,11 @@ private:
     ros::Publisher square_vel_pub;
     ros::Subscriber odom_sub;
 
-    float K_psi;
-
-
-    float v;
+  float v;
 	float w;
-	float K_omega = 1; // Linear error 
-	//float K_psi  = 1.6;    // Angular error
-	float p = 1;		 // Recovery speed during line following
+	float K_omega; // Linear error
+	float K_psi;    // Angular error
+	float p;		 // Recovery speed during line following
 	float theta_ref;
 
 	float goal_pos_arr[4][2] = {
@@ -42,9 +39,9 @@ private:
 		{0.0,1.0}
 	};
 
-	enum CONTROLLER_STATE 
-	{   ROTATE = 1, 
-	    FOLLOW_LINE = 2, 
+	enum CONTROLLER_STATE
+	{   ROTATE = 1,
+	    FOLLOW_LINE = 2,
 	};
 
 
@@ -91,7 +88,7 @@ private:
 
 		switch (ControllerState) {
 
-		  case 1 : 
+		  case 1 :
 		    std::cout << "ROTATE" << "\n";
 		    std::cout << "Diff" << (theta - theta_ref) <<"\n";
 		  	if (theta - theta_ref > 0.05 || theta - theta_ref < -0.05 ){
@@ -106,7 +103,7 @@ private:
 		  	}
 		    break;
 
-		  case 2 : 
+		  case 2 :
 		    std::cout << "FOLLOW LINE" << "\n";
 		    if(cos(theta)*(x_goal-x) + sin(theta)*(y_goal-y) > 0.05 || cos(theta)*(x_goal-x) + sin(theta)*(y_goal-y) < -0.05 ){
 		  		w = K_psi*(sin(theta_ref)*(x + p*cos(theta)-x_start) - cos(theta_ref)*(y + p*sin(theta)- y_start));
