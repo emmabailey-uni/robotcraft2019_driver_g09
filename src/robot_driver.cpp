@@ -192,7 +192,7 @@ private:
 
     std_msgs::UInt8MultiArray setLEDs(){
         auto rgb_MSG = std_msgs::UInt8MultiArray();
-        // Set color of led lights, the first 3 enteries are for LED_1 [255,0,0] and the last 3 for LED_2 [0,255,0] 
+        // Set color of led lights, the first 3 enteries are for LED_1 [255,0,0] and the last 3 for LED_2 [0,255,0]
         // THIS IS NOT SET UP CORRECTLY, FOLLOW THIS EXAMPKE: http://alexsleat.co.uk/2011/07/02/ros-publishing-and-subscribing-to-arrays/
         //rgb_MSG.data = [255,0,0,0,255,0];
         return rgb_MSG;
