@@ -3,6 +3,7 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include <rosserial_arduino/Test.h>
+#include <string>
 
 #include "ros/ros.h"
 #include "sensor_msgs/LaserScan.h"
@@ -12,6 +13,7 @@
 #include "std_msgs/UInt8MultiArray.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/Header.h"
+
 
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643383279502884L
@@ -53,7 +55,7 @@ private:
     ros::Subscriber square_vel_sub;
 
     //Service client
-    ros::ServiceClient client;
+    ros::ServiceClient buzzer_client;
 
 
     double front_obstacle_distance;
@@ -190,18 +192,20 @@ private:
 
     std_msgs::UInt8MultiArray setLEDs(){
         auto rgb_MSG = std_msgs::UInt8MultiArray();
-        // Set color of led lights, the first 3 enteries are for LED_1 [255,0,0] and the last 3 for LED_2 [0,255,0]
-        rgb_MSG.data = [255,0,0,0,255,0];
+        // Set color of led lights, the first 3 enteries are for LED_1 [255,0,0] and the last 3 for LED_2 [0,255,0] 
+        // THIS IS NOT SET UP CORRECTLY, FOLLOW THIS EXAMPKE: http://alexsleat.co.uk/2011/07/02/ros-publishing-and-subscribing-to-arrays/
+        //rgb_MSG.data = [255,0,0,0,255,0];
         return rgb_MSG;
     }
 
-    void switchBuzzerState(char c){
+    // NEED HELP WITH STRING IN C++
+    void switchBuzzerState(std::string c){
         // Set led to "0" or "1" by char c
         rosserial_arduino::Test Buzzer_ctr;
         Buzzer_ctr.request.input = c;
 
         //NOT SURE IF THIS IS THE CORRECT WAY TO ACCESS CLIENT
-        if(this->client.call(Buzzer_ctr)){
+        if(this->buzzer_client.call(Buzzer_ctr)){
             ROS_INFO(Buzzer_ctr.response.output);
         }else{
             ROS_ERROR("Failed to call service ");
@@ -234,7 +238,7 @@ public:
 
 
         // Service Client ALSO NOT SURE IF I NEED TO ADD "~" BEFORE switch_buzzer_state
-        this->client = n.serviceClient<rosserial_arduino::Test>("switch_buzzer_state");
+        this->buzzer_client = n.serviceClient<rosserial_arduino::Test>("switch_buzzer_state");
 
 
     }
@@ -258,14 +262,16 @@ public:
             this->set_pose_pub.publish(pose_MSG);
             this->rgb_leds_pub.publish(rgb_MSG);
 
-            // Buzz from count 100 to 200
+            std::string on = "1";
+            std::string off = "0";
+            // Buzz from count 100 to 500
             if(count = 100){
-                switchBuzzerState("1");
+                switchBuzzerState(on);
             }
-            if(count = 200){
-                switchBuzzerState("0");
+            if(count = 500){
+                switchBuzzerState(off);
             }
-            if(count > 200){
+            if(count > 500){
                 count = count;
             }else{
                 count++;
