@@ -199,6 +199,7 @@ private:
     }
 
     // NEED HELP WITH STRING IN C++
+
     void switchBuzzerState(std::string c){
         // Set led to "0" or "1" by char c
         rosserial_arduino::Test Buzzer_ctr;
@@ -206,12 +207,11 @@ private:
 
         //NOT SURE IF THIS IS THE CORRECT WAY TO ACCESS CLIENT
         if(this->buzzer_client.call(Buzzer_ctr)){
-            ROS_INFO(Buzzer_ctr.response.output);
+            ROS_INFO_STREAM(Buzzer_ctr.response.output);
         }else{
             ROS_ERROR("Failed to call service ");
         }
     }
-
 
 
 public:
@@ -241,6 +241,7 @@ public:
         this->buzzer_client = n.serviceClient<rosserial_arduino::Test>("switch_buzzer_state");
 
 
+
     }
 
 
@@ -264,18 +265,10 @@ public:
 
             std::string on = "1";
             std::string off = "0";
+
             // Buzz from count 100 to 500
-            if(count = 100){
-                switchBuzzerState(on);
-            }
-            if(count = 500){
-                switchBuzzerState(off);
-            }
-            if(count > 500){
-                count = count;
-            }else{
-                count++;
-            }
+            //switchBuzzerState(on);
+
 
             ros::spinOnce();
 

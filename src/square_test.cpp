@@ -54,7 +54,7 @@ private:
 
         float distance = sqrt((x_orig - x)*(x_orig - x) + (y_orig - y)*(y_orig - y));
         if (distance<0.5){
-          square_vel_msg.linear.x = 0.5; // m/0.1s
+          square_vel_msg.linear.x = 0.05; // m/0.1s
           square_vel_msg.angular.z = 0;
           theta_orig = theta;
         }else{
@@ -68,7 +68,7 @@ private:
               theta = M_PI +(M_PI + theta);
             }
           if(fabs(theta - theta_orig) <= 0.9*M_PI/2){
-            square_vel_msg.angular.z = 0.56;
+            square_vel_msg.angular.z = 0.5;
           }else{
             // When the turn is finished update the reference position
             x_orig = x;
