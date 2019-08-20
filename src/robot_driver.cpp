@@ -209,9 +209,9 @@ public:
         // Create a subscriber for laser scans
         //this->laser_sub = n.subscribe("base_scan", 10, &SquareTest::laserCallback, this);
         this->pose_sub = n.subscribe("pose", 10, &RobotDriver::poseCallback, this);
-        this->left_dist_sub = n.subscribe("left_dist", 10, &RobotDriver::leftCallback, this);
-        this->right_dist_sub = n.subscribe("right_dist", 10, &RobotDriver::rightCallback, this);
-        this->front_dist_sub = n.subscribe("front_dist", 10, &RobotDriver::frontCallback, this);
+        this->left_dist_sub = n.subscribe("left_distance", 10, &RobotDriver::leftCallback, this);
+        this->right_dist_sub = n.subscribe("right_distance", 10, &RobotDriver::rightCallback, this);
+        this->front_dist_sub = n.subscribe("front_distance", 10, &RobotDriver::frontCallback, this);
         this->square_vel_sub = n.subscribe("square_vel_pub", 10, &RobotDriver::SquareVelCallback, this);
 
 
