@@ -1,9 +1,9 @@
 #include <iostream>
-
 #include <cstdlib>
-
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <rosserial_arduino/Test.h>
+#include <string>
 
 #include "ros/ros.h"
 #include "sensor_msgs/LaserScan.h"
@@ -13,6 +13,7 @@
 #include "std_msgs/UInt8MultiArray.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/Header.h"
+
 
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643383279502884L
@@ -53,12 +54,16 @@ private:
     ros::Subscriber pose_sub;
     ros::Subscriber square_vel_sub;
 
+    //Service client
+    ros::ServiceClient buzzer_client;
+
+
     double front_obstacle_distance;
     double right_obstacle_distance;
     double left_obstacle_distance;
 
     geometry_msgs::Twist calculateCommand(){
-      auto msg = geometry_msgs::Twist();
+        auto msg = geometry_msgs::Twist();
     }
 
     //Callback functions for subscribers
@@ -163,32 +168,49 @@ private:
     }
 
     void SquareVelCallback(const geometry_msgs::Twist& square_vel_msg){
-      v=square_vel_msg.linear.x;
-      w=square_vel_msg.angular.z;
+        // Update globally stored velocities for further use/publishing
+        v=square_vel_msg.linear.x;
+        w=square_vel_msg.angular.z;
     }
 
-        geometry_msgs::Twist cmdVelUpdate(){
-            auto vel_MSG = geometry_msgs::Twist();
-            // Our code here
-            vel_MSG.linear.x = v;
-            vel_MSG.angular.z = w;
-            return vel_MSG;
+    geometry_msgs::Twist cmdVelUpdate(){
+        auto vel_MSG = geometry_msgs::Twist();
+        // Update velocities to be published
+        vel_MSG.linear.x = v;
+        vel_MSG.angular.z = w;
+        return vel_MSG;
+    }
+
+    geometry_msgs::Pose2D setPose(){
+        auto pose_MSG = geometry_msgs::Pose2D();
+        // Set position to zero
+        pose_MSG.x = 0.0;
+        pose_MSG.y = 0.0;
+        pose_MSG.theta = 0.0;
+        return pose_MSG;
+    }
+
+    std_msgs::UInt8MultiArray setLEDs(){
+        auto rgb_MSG = std_msgs::UInt8MultiArray();
+        // Set color of led lights, the first 3 enteries are for LED_1 [255,0,0] and the last 3 for LED_2 [0,255,0] 
+        // THIS IS NOT SET UP CORRECTLY, FOLLOW THIS EXAMPKE: http://alexsleat.co.uk/2011/07/02/ros-publishing-and-subscribing-to-arrays/
+        //rgb_MSG.data = [255,0,0,0,255,0];
+        return rgb_MSG;
+    }
+
+    // NEED HELP WITH STRING IN C++
+    void switchBuzzerState(std::string c){
+        // Set led to "0" or "1" by char c
+        rosserial_arduino::Test Buzzer_ctr;
+        Buzzer_ctr.request.input = c;
+
+        //NOT SURE IF THIS IS THE CORRECT WAY TO ACCESS CLIENT
+        if(this->buzzer_client.call(Buzzer_ctr)){
+            ROS_INFO(Buzzer_ctr.response.output);
+        }else{
+            ROS_ERROR("Failed to call service ");
         }
-
-        geometry_msgs::Pose2D setPose(){
-            auto pose_MSG = geometry_msgs::Pose2D();
-            // Our code here
-
-            return pose_MSG;
-        }
-
-        std_msgs::UInt8MultiArray setLEDs(){
-            auto rgb_MSG = std_msgs::UInt8MultiArray();
-            // Our code here
-
-            return rgb_MSG;
-        }
-
+    }
 
 
 
@@ -202,9 +224,9 @@ public:
         this->odom_pub = this->n.advertise<nav_msgs::Odometry>("odom", 10);
         this->set_pose_pub = this->n.advertise<geometry_msgs::Pose2D>("set_pose", 10);
         this->rgb_leds_pub = this->n.advertise<std_msgs::UInt8MultiArray>("rgb_leds", 10);
-        this-> ir_front_sensor = this->n.advertise<sensor_msgs::Range>("ir_front_sensor", 10);
-        this-> ir_left_sensor = this->n.advertise<sensor_msgs::Range>("ir_left_sensor", 10);
-        this-> ir_right_sensor = this->n.advertise<sensor_msgs::Range>("ir_right_sensor", 10);
+        this->ir_front_sensor = this->n.advertise<sensor_msgs::Range>("ir_front_sensor", 10);
+        this->ir_left_sensor = this->n.advertise<sensor_msgs::Range>("ir_left_sensor", 10);
+        this->ir_right_sensor = this->n.advertise<sensor_msgs::Range>("ir_right_sensor", 10);
 
         // Create a subscriber for laser scans
         //this->laser_sub = n.subscribe("base_scan", 10, &SquareTest::laserCallback, this);
@@ -215,10 +237,15 @@ public:
         this->square_vel_sub = n.subscribe("square_vel_pub", 10, &RobotDriver::SquareVelCallback, this);
 
 
+        // Service Client ALSO NOT SURE IF I NEED TO ADD "~" BEFORE switch_buzzer_state
+        this->buzzer_client = n.serviceClient<rosserial_arduino::Test>("switch_buzzer_state");
+
+
     }
 
 
     void run(){
+        int count = 0;
         // Send messages in a loop
         ros::Rate loop_rate(10);
         while (ros::ok())
@@ -234,6 +261,21 @@ public:
             this->cmd_vel_pub.publish(vel_MSG);
             this->set_pose_pub.publish(pose_MSG);
             this->rgb_leds_pub.publish(rgb_MSG);
+
+            std::string on = "1";
+            std::string off = "0";
+            // Buzz from count 100 to 500
+            if(count = 100){
+                switchBuzzerState(on);
+            }
+            if(count = 500){
+                switchBuzzerState(off);
+            }
+            if(count > 500){
+                count = count;
+            }else{
+                count++;
+            }
 
             ros::spinOnce();
 
