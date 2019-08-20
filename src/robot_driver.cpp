@@ -247,8 +247,10 @@ public:
 
     void run(){
         int count = 0;
+        static int setposeflag = 1;
         // Send messages in a loop
         ros::Rate loop_rate(10);
+
         while (ros::ok())
         {
             // Calculate the command to apply
@@ -260,8 +262,13 @@ public:
             //HAVENT CREATED THESE VARIABLES YET
             // Publish the new command
             this->cmd_vel_pub.publish(vel_MSG);
-            this->set_pose_pub.publish(pose_MSG);
             this->rgb_leds_pub.publish(rgb_MSG);
+
+            if(setposeflag){
+                this->set_pose_pub.publish(pose_MSG);
+                setposeflag=0;
+            }
+
 
             std::string on = "1";
             std::string off = "0";
