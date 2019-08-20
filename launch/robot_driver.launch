@@ -4,5 +4,7 @@
 	<param name="K_psi" type="double" value="1.0" />
   <param name="K_omega" type="double" value="1" />
 	<param name="p" type="double" value="1" />
+<param name="desired_ang_vel" type="double" value="0.1" />
+<param name="correction_factor" type="double" value="0.85" />
 
 </launch>

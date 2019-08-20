@@ -184,8 +184,8 @@ private:
     geometry_msgs::Pose2D setPose(){
         auto pose_MSG = geometry_msgs::Pose2D();
         // Set position to zero
-        pose_MSG.x = 0.0;
-        pose_MSG.y = 0.0;
+        pose_MSG.x = 4.0;
+        pose_MSG.y = 4.0;
         pose_MSG.theta = 0.0;
         return pose_MSG;
     }
@@ -215,10 +215,10 @@ private:
 
 
 public:
+  //constructor
     RobotDriver(){
         // Initialize ROS
         this->n = ros::NodeHandle();
-
         // Create a publisher object, able to push messages
         this->cmd_vel_pub = this->n.advertise<geometry_msgs::Twist>("cmd_vel", 10);
         this->odom_pub = this->n.advertise<nav_msgs::Odometry>("odom", 10);
@@ -241,33 +241,30 @@ public:
         this->buzzer_client = n.serviceClient<rosserial_arduino::Test>("switch_buzzer_state");
 
 
-
     }
+
 
 
     void run(){
         int count = 0;
-        static int setposeflag = 1;
+
         // Send messages in a loop
         ros::Rate loop_rate(10);
 
         while (ros::ok())
         {
+
             // Calculate the command to apply
             auto msg = calculateCommand();
             auto vel_MSG = cmdVelUpdate();
-            auto pose_MSG = setPose();
             auto rgb_MSG = setLEDs();
+            auto pose_MSG = setPose();
 
             //HAVENT CREATED THESE VARIABLES YET
             // Publish the new command
             this->cmd_vel_pub.publish(vel_MSG);
             this->rgb_leds_pub.publish(rgb_MSG);
-
-            if(setposeflag){
-                this->set_pose_pub.publish(pose_MSG);
-                setposeflag=0;
-            }
+            this->set_pose_pub.publish(pose_MSG);
 
 
             std::string on = "1";

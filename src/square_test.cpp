@@ -18,6 +18,8 @@
 float r;
 float x, y, theta;
 
+float desired_ang_vel, correction_factor;
+
 class SquareTest
 {
 private:
@@ -67,8 +69,8 @@ private:
             if (theta_orig > M_PI/2  &&  theta<M_PI/2){
               theta = M_PI +(M_PI + theta);
             }
-          if(fabs(theta - theta_orig) <= 0.9*M_PI/2){
-            square_vel_msg.angular.z = 0.5;
+          if(fabs(theta - theta_orig) <= correction_factor*M_PI/2){
+            square_vel_msg.angular.z = desired_ang_vel;
           }else{
             // When the turn is finished update the reference position
             x_orig = x;
@@ -130,6 +132,9 @@ public:
         this->ir_right_sensor_sub = n.subscribe("ir_right_sensor", 10, &SquareTest::rightSensorCallback, this);
         this->ir_left_sensor_sub = n.subscribe("ir_left_sensor", 10, &SquareTest::leftSensorCallback, this);
 
+        this->n.getParam("/desired_ang_vel", desired_ang_vel);
+        this->n.getParam("/correction_factor", correction_factor);
+        //this->n.getParam("/p", p);
     }
 
     void run(){
