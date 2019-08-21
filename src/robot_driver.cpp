@@ -234,7 +234,7 @@ public:
         this->left_dist_sub = n.subscribe("left_distance", 10, &RobotDriver::leftCallback, this);
         this->right_dist_sub = n.subscribe("right_distance", 10, &RobotDriver::rightCallback, this);
         this->front_dist_sub = n.subscribe("front_distance", 10, &RobotDriver::frontCallback, this);
-        this->square_vel_sub = n.subscribe("square_vel_pub", 10, &RobotDriver::SquareVelCallback, this);
+        this->square_vel_sub = n.subscribe("reactive_vel", 10, &RobotDriver::SquareVelCallback, this);
 
 
         // Service Client ALSO NOT SURE IF I NEED TO ADD "~" BEFORE switch_buzzer_state
